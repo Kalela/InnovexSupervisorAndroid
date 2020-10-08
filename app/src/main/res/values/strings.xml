@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Innovex Supervisor</string>
+    <string name="get_report">Get Tasks Report</string>
+    <string name="latest_task_completed">Latest Task Completed</string>
 </resources>

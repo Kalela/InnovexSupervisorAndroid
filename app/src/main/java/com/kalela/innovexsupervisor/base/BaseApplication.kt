@@ -1,6 +1,7 @@
 package com.kalela.innovexsupervisor.base
 
 import android.app.Application
+import com.google.firebase.FirebaseApp
 
 /**
  * Contains dependencies that are required to be instantiated before the application begins.
@@ -8,10 +9,10 @@ import android.app.Application
 class BaseApplication : Application() {
 //    lateinit var smartPhoneComponent: SmartPhoneComponent
 //
-//    override fun onCreate() {
+    override fun onCreate() {
 //        smartPhoneComponent = initDagger()
-//        super.onCreate()
-//    }
+        super.onCreate()
+    }
 //
 //    private fun initDagger(): SmartPhoneComponent = DaggerSmartPhoneComponent
 //        .builder()

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "20833563260",
+    "firebase_url": "https://innovex-supervisor.firebaseio.com",
+    "project_id": "innovex-supervisor",
+    "storage_bucket": "innovex-supervisor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:20833563260:android:8cdcc16c348aa51addcff9",
+        "android_client_info": {
+          "package_name": "com.kalela.innovexsupervisor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "20833563260-olbaks5pe1s6ktk43o237d34js8ud1g2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7KA38itzpnuXqc8a-16fuQ8y3bGvBflk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "20833563260-olbaks5pe1s6ktk43o237d34js8ud1g2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
