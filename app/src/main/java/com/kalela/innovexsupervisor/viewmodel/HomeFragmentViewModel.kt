@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainActivityViewModel : ViewModel(), Observable {
+class HomeFragmentViewModel : ViewModel(), Observable {
     private val TAG = "MainActivityViewModel"
 
     private val statusMessage = MutableLiveData<Event<String>>()

@@ -3,96 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="myViewModel"
-            type="com.kalela.innovexsupervisor.viewmodel.MainActivityViewModel" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.MainActivity">
 
-        <Button
-            android:id="@+id/getReportButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/get_report"
+        <fragment
+            android:id="@+id/fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginBottom="1dp"
+            app:defaultNavHost="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/analogClock" />
-
-        <com.kalela.innovexsupervisor.ui.clock.AnalogClock
-            android:id="@+id/analogClock"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            app:layout_constraintBottom_toTopOf="@+id/analogClock"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cardConstraintLayout"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:id="@+id/linearLayout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="@+id/cardConstraintLayout"
-                    app:layout_constraintEnd_toEndOf="@+id/cardConstraintLayout"
-                    app:layout_constraintStart_toStartOf="@+id/cardConstraintLayout"
-                    app:layout_constraintTop_toTopOf="@+id/cardConstraintLayout">
-
-                    <TextView
-                        android:id="@+id/cardViewTitleTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/latest_task_completed"
-                        android:textAlignment="center"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/taskName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].name}"
-                        android:textAlignment="center" />
-
-                    <TextView
-                        android:id="@+id/taskTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].task_definition}"
-                        android:textAlignment="center" />
-
-                    <TextView
-                        android:id="@+id/taskActualTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].actualTimeAsString}"
-                        android:textAlignment="center" />
-
-                </LinearLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/nav_graph" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

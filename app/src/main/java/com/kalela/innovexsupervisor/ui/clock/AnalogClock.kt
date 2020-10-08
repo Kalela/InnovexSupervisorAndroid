@@ -33,6 +33,7 @@ class AnalogClock @JvmOverloads constructor(
     private lateinit var mRect: Rect
     private var mMinimum = 0
     private var mHour = 0
+    private var mHourTracked = 0
     private var mMinute = 0
     private var mSecond = 0
     private var mHourHandSize = 0
@@ -63,6 +64,10 @@ class AnalogClock @JvmOverloads constructor(
             mSecond += 1
             if(mSecond % 60 == 0) {
                 mMinute += 1
+            }
+            if (mMinute % 60 == 0) {
+                mHourTracked += 1
+                mHourTracked = if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
             }
         }, 1000, 1000)
     }
