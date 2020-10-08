@@ -3,8 +3,10 @@ package com.kalela.innovexsupervisor.ui.clock
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -14,6 +16,9 @@ class AnalogClock @JvmOverloads constructor(
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attributeSet, defStyleAttr) {
+
+    private val TAG = "AnalogClock"
+
     private var mHeight = 0
     private var mWidth = 0
     private var mRadius = 0
@@ -27,9 +32,9 @@ class AnalogClock @JvmOverloads constructor(
     private lateinit var mNumbers: IntArray
     private lateinit var mRect: Rect
     private var mMinimum = 0
-    private var mHour = 0f
-    private var mMinute = 0f
-    private var mSecond = 0f
+    private var mHour = 0
+    private var mMinute = 0
+    private var mSecond = 0
     private var mHourHandSize = 0
     private var mHandSize = 0
     private val mFontSize = 50.0f
@@ -50,12 +55,23 @@ class AnalogClock @JvmOverloads constructor(
         mHandSize = mRadius - mRadius / 4
         mNumbers = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         mIsInit = true
+
+    }
+
+    private fun initializeClock() {
+        Timer().scheduleAtFixedRate(timerTask {
+            mSecond += 1
+            if(mSecond % 60 == 0) {
+                mMinute += 1
+            }
+        }, 1000, 1000)
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (!mIsInit) {
             init()
+            initializeClock()
         }
 
         drawCircle(canvas)
@@ -67,7 +83,6 @@ class AnalogClock @JvmOverloads constructor(
     private fun drawCircle(canvas: Canvas?) {
         mPaint?.reset()
         setPaintAttributes(Color.BLACK, Paint.Style.FILL, 8.0f)
-//        mPaint?.color = resources.getColor(android.R.color.black)
         mPaint?.let {
             canvas?.drawCircle(
                 mCentreX.toFloat(), mCentreY.toFloat(), mRadius.toFloat(),
@@ -85,16 +100,9 @@ class AnalogClock @JvmOverloads constructor(
     }
 
     private fun drawHands(canvas: Canvas?) {
-        val calendar: Calendar = Calendar.getInstance()
-        mHour = calendar.get(Calendar.HOUR_OF_DAY).toFloat()
-        mHour =
-            if (mHour > 12) mHour - 12 else mHour //convert to 12hour                                                     format from 24 hour format
-
-        mMinute = calendar.get(Calendar.MINUTE).toFloat()
-        mSecond = calendar.get(Calendar.SECOND).toFloat()
         drawHourHand(canvas, (mHour + mMinute / 60.0) * 5f)
-        drawMinuteHand(canvas, mMinute)
-        drawSecondsHand(canvas, mSecond)
+        drawMinuteHand(canvas, mMinute * 1f)
+        drawSecondsHand(canvas, mSecond.toFloat())
     }
 
     private fun drawSecondsHand(canvas: Canvas?, location: Float) {
