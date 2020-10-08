@@ -10,11 +10,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.kalela.innovexsupervisor.data.model.Task
 import com.kalela.innovexsupervisor.util.Event
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivityViewModel : ViewModel(), Observable {
     private val TAG = "MainActivityViewModel"
-
 
     private val statusMessage = MutableLiveData<Event<String>>()
     val message: LiveData<Event<String>>
@@ -39,8 +40,11 @@ class MainActivityViewModel : ViewModel(), Observable {
             querySnapshot?.let {
                 for (document in it) {
                     val task = document.toObject<Task>()
+                    val sdf = SimpleDateFormat("MM/dd/yyyy")
+                    val milliseconds = task.actual_time.seconds * 1000 + task.actual_time.nanoseconds / 1000000
+                    task.actualTimeAsString = "at ${sdf.format(milliseconds).toString()}"
+
                     listOfTasks.add(task)
-//                    Log.d(TAG, "tasks ${listOfTasks}")
                 }
             }
 

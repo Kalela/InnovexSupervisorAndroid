@@ -37,10 +37,8 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="100dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             app:layout_constraintBottom_toTopOf="@+id/analogClock"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +46,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cardConstraintLayout"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -80,14 +80,14 @@
                         android:id="@+id/taskTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].name}"
+                        android:text="@{myViewModel.allTasks[0].task_definition}"
                         android:textAlignment="center" />
 
                     <TextView
                         android:id="@+id/taskActualTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].name}"
+                        android:text="@{myViewModel.allTasks[0].actualTimeAsString}"
                         android:textAlignment="center" />
 
                 </LinearLayout>
