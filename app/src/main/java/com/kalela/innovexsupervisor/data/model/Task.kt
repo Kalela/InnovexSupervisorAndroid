@@ -4,8 +4,9 @@ import com.google.firebase.Timestamp
 
 data class Task(
     val name: String = "",
-    val actual_time: String = "",
+    val actual_time: Timestamp = Timestamp(0,0),
     var actualTimeAsString : String = "",
-    val application_time: String = "",
-    val task_definition: String = ""
+    val application_time: Timestamp = Timestamp(0,0),
+    val task_definition: String = "",
+    val color : Int = 0
 )

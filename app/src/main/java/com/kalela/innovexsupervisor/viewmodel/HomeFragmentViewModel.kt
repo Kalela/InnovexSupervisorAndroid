@@ -1,12 +1,11 @@
 package com.kalela.innovexsupervisor.viewmodel
 
-import android.util.Log
 import androidx.databinding.Observable
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
+import com.kalela.innovexsupervisor.data.model.AnalogTime
 import com.kalela.innovexsupervisor.data.model.Task
 import com.kalela.innovexsupervisor.injection.retrofit.TasksService
-import com.kalela.innovexsupervisor.ui.clock.AnalogClock
 import com.kalela.innovexsupervisor.util.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,28 +24,41 @@ class HomeFragmentViewModel(
     private var mHourTracked = 0
     var seconds: Int = 0
     var minutes: Int = 0
-
+    val analogTime = MutableLiveData<AnalogTime>()
+    var isConnected: Boolean = true
     private val statusMessage = MutableLiveData<Event<String>>()
+
     val message: LiveData<Event<String>>
         get() = statusMessage
-    private var tasks = MutableLiveData<List<Task>>()
-    val allTasks: LiveData<List<Task>>
-        get() = tasks
+    private var task = MutableLiveData<Task>()
+    val dueTask: LiveData<Task>
+        get() = task
 
-    fun checkBackendTasks() {
+
+    private fun checkBackendTasks() {
         val tasksService: TasksService = retrofit.create(
             TasksService::class.java
         )
 
-        val responseLiveData: LiveData<Response<List<Task>>> = liveData {
-            val response = tasksService.getAllTasks()
+        val responseDueTask: LiveData<Response<List<Task>>> = liveData {
+            val response = tasksService.getRunningTasks()
             emit(response)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.Main) {
-                responseLiveData.observe(viewLifecycleOwner, Observer {
-                    tasks.value = it.body()
+                responseDueTask.observe(viewLifecycleOwner, Observer {
+                    when (it.body()?.get(0)?.name) {
+                        "START" -> {
+                            task.value = Task(name = "STOP")
+                        }
+                        "STOP" -> {
+                            task.value = Task(name = "REPORT")
+                        }
+                        "REPORT" -> {
+                            task.value = Task(name = "START")
+                        }
+                    }
                 })
             }
         }
@@ -54,8 +66,51 @@ class HomeFragmentViewModel(
 
     }
 
+    /**
+     * Stop all running tasks
+     */
+    fun stopAllTasks() {
+        val tasksService: TasksService = retrofit.create(
+            TasksService::class.java
+        )
+
+        val response: LiveData<Response<HashMap<String, String>>> = liveData {
+            val response = tasksService.stopTasks()
+            emit(response)
+        }
+
+        response.observe(viewLifecycleOwner, Observer {
+            if (it.message() == "OK") {
+                statusMessage.value = Event("Tasks stopped successfully")
+            }
+        })
+
+    }
+
+    /**
+     * Delete all stored tasks
+     */
+    fun deleteAllTasks() {
+        val tasksService: TasksService = retrofit.create(
+            TasksService::class.java
+        )
+
+        val response: LiveData<Response<HashMap<String, String>>> = liveData {
+            val response = tasksService.stopTasks()
+            emit(response)
+        }
+
+        response.observe(viewLifecycleOwner, Observer {
+            if (it.message() == "OK") {
+                statusMessage.value = Event("Tasks stopped successfully")
+            }
+        })
+    }
+
+    /**
+     * Set up recurring calls to simulate time.
+     */
     fun initializeClock() {
-        checkBackend() // start backend checl on start
         Timer().scheduleAtFixedRate(timerTask {
             seconds += 1
             if (seconds % 60 == 0) {
@@ -66,13 +121,26 @@ class HomeFragmentViewModel(
                 mHourTracked =
                     if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
             }
+            viewLifecycleOwner.lifecycleScope.launch {
+                withContext(Dispatchers.Main) {
+                    analogTime.value = getTime(seconds, minutes)
+                }
+            }
+
             checkBackend()
         }, 1000, 1000)
 
     }
 
-    private fun checkBackend() {
-        if (seconds % 30 == 0 || seconds == 0) {
+    private fun getTime(seconds: Int, minutes: Int): AnalogTime {
+        return AnalogTime(seconds, minutes)
+    }
+
+    /**
+     * Check running tasks if 30 seconds have elapsed
+     */
+    fun checkBackend() {
+        if (seconds % 10 == 0) {
             checkBackendTasks()
         }
     }
@@ -82,6 +150,4 @@ class HomeFragmentViewModel(
 
     override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
     }
-
-
 }

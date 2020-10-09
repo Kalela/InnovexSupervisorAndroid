@@ -12,8 +12,10 @@ import com.kalela.innovexsupervisor.base.BaseApplication
 import com.kalela.innovexsupervisor.data.model.Task
 import com.kalela.innovexsupervisor.databinding.ActivityMainBinding
 import com.kalela.innovexsupervisor.injection.retrofit.TasksService
+import com.kalela.innovexsupervisor.util.Event
 import retrofit2.Response
 import retrofit2.Retrofit
+import java.util.HashMap
 import javax.inject.Inject
 
 /**
@@ -31,22 +33,21 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         (application as BaseApplication).apiComponent.injectMainActivity(this)
-
-//        checkBackendTasks()
     }
 
-    fun checkBackendTasks() {
-        val tasksService : TasksService = retrofit.create(
-            TasksService::class.java)
+    override fun onDestroy() {
+        deleteAllTasks()
+        super.onDestroy()
+    }
 
-        val responseLiveData : LiveData<Response<List<Task>>> = liveData {
-            val response = tasksService.getAllTasks()
+    private fun deleteAllTasks() {
+        val tasksService: TasksService = retrofit.create(
+            TasksService::class.java
+        )
+
+        val response: LiveData<Response<HashMap<String, String>>> = liveData {
+            val response = tasksService.stopTasks()
             emit(response)
         }
-
-        responseLiveData.observe(this, Observer {
-            Log.d(TAG, "checkBackendTasks: ${it.body()}")
-        })
-
     }
 }

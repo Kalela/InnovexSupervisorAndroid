@@ -10,4 +10,13 @@ interface TasksService {
 
     @GET("tasks/running")
     suspend fun getRunningTasks() : Response<List<Task>>
+
+    @GET("tasks/stop")
+    suspend fun stopTasks() : Response<HashMap<String, String>>
+
+    @GET("tasks/start")
+    suspend fun startTasks() : Response<HashMap<String, String>>
+
+    @GET("tasks/clear")
+    suspend fun clearTasks() : Response<HashMap<String, String>>
 }

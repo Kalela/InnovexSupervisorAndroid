@@ -38,6 +38,8 @@ class AnalogClock @JvmOverloads constructor(
     private var mHourHandSize = 0
     private var mHandSize = 0
     private val mFontSize = 50.0f
+    var numbersColor : Int = 0xFFFFFFF
+    var backboardColor : Int = 0xFF00000
 
     private fun init() {
         mHeight = height
@@ -72,7 +74,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawCircle(canvas: Canvas?) {
         mPaint?.reset()
-        setPaintAttributes(Color.BLACK, Paint.Style.FILL, 8.0f)
+        setPaintAttributes(numbersColor, Paint.Style.FILL, 8.0f)
         mPaint?.let {
             canvas?.drawCircle(
                 mCentreX.toFloat(), mCentreY.toFloat(), mRadius.toFloat(),
@@ -148,6 +150,7 @@ class AnalogClock @JvmOverloads constructor(
         for (number: Int in mNumbers) {
             val num: String = number.toString()
             mPaint?.getTextBounds(num, 0, num.length, mRect)
+            mPaint?.color = numbersColor
             val angle: Double = Math.PI / 6 * (number - 3)
             val x: Float = (mCentreX + cos(angle) * mRadius - mRect.width() / 2).toFloat()
             val y: Float = (mCentreY + sin(angle) * mRadius + mRect.height() / 2).toFloat()

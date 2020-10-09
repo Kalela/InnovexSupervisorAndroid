@@ -29,8 +29,6 @@
             android:id="@+id/analogClock"
             android:layout_width="300dp"
             android:layout_height="300dp"
-            app:mMinute="@{myViewModel.getMinutes()}"
-            app:mSecond="@{myViewModel.getSeconds()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -75,21 +73,7 @@
                         android:id="@+id/taskName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].name}"
-                        android:textAlignment="center" />
-
-                    <TextView
-                        android:id="@+id/taskTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].task_definition}"
-                        android:textAlignment="center" />
-
-                    <TextView
-                        android:id="@+id/taskActualTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{myViewModel.allTasks[0].actualTimeAsString}"
+                        android:text="@{myViewModel.dueTask.name}"
                         android:textAlignment="center" />
 
                 </LinearLayout>
