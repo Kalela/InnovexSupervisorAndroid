@@ -3,7 +3,6 @@ package com.kalela.innovexsupervisor.ui.clock
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -34,8 +33,8 @@ class AnalogClock @JvmOverloads constructor(
     private var mMinimum = 0
     private var mHour = 0
     private var mHourTracked = 0
-    private var mMinute = 0
-    private var mSecond = 0
+    var mMinute = 0
+    var mSecond = 0
     private var mHourHandSize = 0
     private var mHandSize = 0
     private val mFontSize = 50.0f
@@ -59,30 +58,31 @@ class AnalogClock @JvmOverloads constructor(
 
     }
 
-    private fun initializeClock() {
-        Timer().scheduleAtFixedRate(timerTask {
-            mSecond += 1
-            if(mSecond % 60 == 0) {
-                mMinute += 1
-            }
-            if (mMinute % 60 == 0) {
-                mHourTracked += 1
-                mHourTracked = if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
-            }
-        }, 1000, 1000)
-    }
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (!mIsInit) {
             init()
-            initializeClock()
+//            initClock()
         }
 
         drawCircle(canvas)
         drawHands(canvas)
         drawNumerals(canvas)
         postInvalidateDelayed(500)
+    }
+
+    private fun initClock() {
+        Timer().scheduleAtFixedRate(timerTask {
+            mSecond += 1
+            if (mSecond % 60 == 0) {
+                mMinute += 1
+            }
+            if (mMinute % 60 == 0) {
+                mHourTracked += 1
+                mHourTracked =
+                    if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
+            }
+        }, 1000, 1000)
     }
 
     private fun drawCircle(canvas: Canvas?) {

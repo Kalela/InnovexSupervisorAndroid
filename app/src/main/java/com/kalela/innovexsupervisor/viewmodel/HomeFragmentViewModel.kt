@@ -1,57 +1,65 @@
 package com.kalela.innovexsupervisor.viewmodel
 
 import android.util.Log
-import androidx.databinding.Bindable
 import androidx.databinding.Observable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.kalela.innovexsupervisor.data.model.Task
+import com.kalela.innovexsupervisor.injection.retrofit.TasksService
+import com.kalela.innovexsupervisor.ui.clock.AnalogClock
 import com.kalela.innovexsupervisor.util.Event
-import java.text.SimpleDateFormat
+import retrofit2.Response
+import retrofit2.Retrofit
 import java.util.*
-import kotlin.collections.ArrayList
+import kotlin.concurrent.timerTask
 
-class HomeFragmentViewModel : ViewModel(), Observable {
-    private val TAG = "MainActivityViewModel"
+class HomeFragmentViewModel(
+    val retrofit: Retrofit,
+    private val viewLifecycleOwner: LifecycleOwner
+) : ViewModel(), Observable {
+    private val TAG = "HomeFragmentViewModel"
+
+    private var mHourTracked = 0
+    var seconds: Int = 0
+    var minutes: Int = 0
 
     private val statusMessage = MutableLiveData<Event<String>>()
     val message: LiveData<Event<String>>
         get() = statusMessage
-
     private var tasks = MutableLiveData<List<Task>>()
     val allTasks: LiveData<List<Task>>
         get() = tasks
 
-    private val taskCollectionRef = FirebaseFirestore.getInstance().collection("tasks")
+    fun checkBackendTasks() {
+        val tasksService: TasksService = retrofit.create(
+            TasksService::class.java
+        )
 
-    fun subscribeToRealtimeUpdates() {
-
-        taskCollectionRef.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-            val listOfTasks: ArrayList<Task> = ArrayList()
-
-            firebaseFirestoreException?.let {
-                statusMessage.value = Event("Error occurred while retrieving data.")
-                return@addSnapshotListener
-            }
-
-            querySnapshot?.let {
-                for (document in it) {
-                    val task = document.toObject<Task>()
-                    val sdf = SimpleDateFormat("MM/dd/yyyy")
-                    val milliseconds = task.actual_time.seconds * 1000 + task.actual_time.nanoseconds / 1000000
-                    task.actualTimeAsString = "at ${sdf.format(milliseconds).toString()}"
-
-                    listOfTasks.add(task)
-                }
-            }
-
-            if (listOfTasks.size > 0) {
-                tasks.value = listOfTasks
-            }
+        val responseLiveData: LiveData<Response<List<Task>>> = liveData {
+            val response = tasksService.getAllTasks()
+            emit(response)
         }
+
+        responseLiveData.observe(viewLifecycleOwner, Observer {
+            tasks.value = it.body()
+        })
+
+    }
+
+    fun initializeClock() {
+        Timer().scheduleAtFixedRate(timerTask {
+            seconds += 1
+            if (seconds % 60 == 0) {
+                minutes += 1
+            }
+            if (minutes % 60 == 0) {
+                mHourTracked += 1
+                mHourTracked =
+                    if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
+            }
+        }, 1000, 1000)
+        Log.d(TAG, "initializeClock: seconds = $seconds")
+        Log.d(TAG, "initializeClock: minutes = $minutes")
     }
 
     override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
@@ -59,4 +67,6 @@ class HomeFragmentViewModel : ViewModel(), Observable {
 
     override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
     }
+
+
 }
