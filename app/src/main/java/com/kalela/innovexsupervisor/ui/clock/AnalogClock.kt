@@ -62,27 +62,12 @@ class AnalogClock @JvmOverloads constructor(
         super.onDraw(canvas)
         if (!mIsInit) {
             init()
-//            initClock()
         }
 
         drawCircle(canvas)
         drawHands(canvas)
         drawNumerals(canvas)
         postInvalidateDelayed(500)
-    }
-
-    private fun initClock() {
-        Timer().scheduleAtFixedRate(timerTask {
-            mSecond += 1
-            if (mSecond % 60 == 0) {
-                mMinute += 1
-            }
-            if (mMinute % 60 == 0) {
-                mHourTracked += 1
-                mHourTracked =
-                    if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
-            }
-        }, 1000, 1000)
     }
 
     private fun drawCircle(canvas: Canvas?) {

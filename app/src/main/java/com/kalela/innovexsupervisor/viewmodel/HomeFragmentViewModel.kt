@@ -8,6 +8,9 @@ import com.kalela.innovexsupervisor.data.model.Task
 import com.kalela.innovexsupervisor.injection.retrofit.TasksService
 import com.kalela.innovexsupervisor.ui.clock.AnalogClock
 import com.kalela.innovexsupervisor.util.Event
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import retrofit2.Retrofit
 import java.util.*
@@ -40,13 +43,19 @@ class HomeFragmentViewModel(
             emit(response)
         }
 
-        responseLiveData.observe(viewLifecycleOwner, Observer {
-            tasks.value = it.body()
-        })
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.Main) {
+                responseLiveData.observe(viewLifecycleOwner, Observer {
+                    tasks.value = it.body()
+                })
+            }
+        }
+
 
     }
 
     fun initializeClock() {
+        checkBackend() // start backend checl on start
         Timer().scheduleAtFixedRate(timerTask {
             seconds += 1
             if (seconds % 60 == 0) {
@@ -57,9 +66,15 @@ class HomeFragmentViewModel(
                 mHourTracked =
                     if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
             }
+            checkBackend()
         }, 1000, 1000)
-        Log.d(TAG, "initializeClock: seconds = $seconds")
-        Log.d(TAG, "initializeClock: minutes = $minutes")
+
+    }
+
+    private fun checkBackend() {
+        if (seconds % 30 == 0 || seconds == 0) {
+            checkBackendTasks()
+        }
     }
 
     override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {

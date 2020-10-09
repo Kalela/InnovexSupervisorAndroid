@@ -47,7 +47,6 @@ class HomeFragment : Fragment() {
         val layerDrawable : LayerDrawable = resources.getDrawable(R.drawable.app_background) as LayerDrawable
 
         viewModel.initializeClock()
-        viewModel.checkBackendTasks()
 
         binding.getReportButton.setOnClickListener {
             val layer : ColorDrawable = layerDrawable.getDrawable(1) as ColorDrawable
