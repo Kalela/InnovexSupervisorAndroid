@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -14,6 +15,9 @@ class AnalogClock @JvmOverloads constructor(
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attributeSet, defStyleAttr) {
+
+    private val TAG = "AnalogClock"
+
     private var mHeight = 0
     private var mWidth = 0
     private var mRadius = 0
@@ -27,12 +31,15 @@ class AnalogClock @JvmOverloads constructor(
     private lateinit var mNumbers: IntArray
     private lateinit var mRect: Rect
     private var mMinimum = 0
-    private var mHour = 0f
-    private var mMinute = 0f
-    private var mSecond = 0f
+    private var mHour = 0
+    private var mHourTracked = 0
+    var mMinute = 0
+    var mSecond = 0
     private var mHourHandSize = 0
     private var mHandSize = 0
     private val mFontSize = 50.0f
+    var numbersColor : Int = Color.RED
+    var backboardColor : Int = Color.WHITE
 
     private fun init() {
         mHeight = height
@@ -50,6 +57,7 @@ class AnalogClock @JvmOverloads constructor(
         mHandSize = mRadius - mRadius / 4
         mNumbers = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         mIsInit = true
+
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -66,8 +74,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawCircle(canvas: Canvas?) {
         mPaint?.reset()
-        setPaintAttributes(Color.BLACK, Paint.Style.FILL, 8.0f)
-//        mPaint?.color = resources.getColor(android.R.color.black)
+        setPaintAttributes(backboardColor, Paint.Style.FILL, 8.0f)
         mPaint?.let {
             canvas?.drawCircle(
                 mCentreX.toFloat(), mCentreY.toFloat(), mRadius.toFloat(),
@@ -85,16 +92,9 @@ class AnalogClock @JvmOverloads constructor(
     }
 
     private fun drawHands(canvas: Canvas?) {
-        val calendar: Calendar = Calendar.getInstance()
-        mHour = calendar.get(Calendar.HOUR_OF_DAY).toFloat()
-        mHour =
-            if (mHour > 12) mHour - 12 else mHour //convert to 12hour                                                     format from 24 hour format
-
-        mMinute = calendar.get(Calendar.MINUTE).toFloat()
-        mSecond = calendar.get(Calendar.SECOND).toFloat()
         drawHourHand(canvas, (mHour + mMinute / 60.0) * 5f)
-        drawMinuteHand(canvas, mMinute)
-        drawSecondsHand(canvas, mSecond)
+        drawMinuteHand(canvas, mMinute * 1f)
+        drawSecondsHand(canvas, mSecond.toFloat())
     }
 
     private fun drawSecondsHand(canvas: Canvas?, location: Float) {
@@ -115,7 +115,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawMinuteHand(canvas: Canvas?, location: Float) {
         mPaint?.reset()
-        setPaintAttributes(Color.WHITE, Paint.Style.STROKE, 8.0f)
+        setPaintAttributes(Color.BLUE, Paint.Style.STROKE, 8.0f)
         mAngle = Math.PI * location / 30 - Math.PI / 2
         mPaint?.let {
             canvas?.drawLine(
@@ -131,7 +131,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawHourHand(canvas: Canvas?, location: Double) {
         mPaint?.reset()
-        setPaintAttributes(Color.WHITE, Paint.Style.STROKE, 10.0f)
+        setPaintAttributes(Color.BLACK, Paint.Style.STROKE, 10.0f)
         mAngle = Math.PI * location / 30 - Math.PI / 2
         mPaint?.let {
             canvas?.drawLine(
@@ -150,6 +150,7 @@ class AnalogClock @JvmOverloads constructor(
         for (number: Int in mNumbers) {
             val num: String = number.toString()
             mPaint?.getTextBounds(num, 0, num.length, mRect)
+            mPaint?.color = numbersColor
             val angle: Double = Math.PI / 6 * (number - 3)
             val x: Float = (mCentreX + cos(angle) * mRadius - mRect.width() / 2).toFloat()
             val y: Float = (mCentreY + sin(angle) * mRadius + mRect.height() / 2).toFloat()

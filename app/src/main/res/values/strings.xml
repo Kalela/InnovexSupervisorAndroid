@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Innovex Supervisor</string>
+    <string name="get_report">Get Tasks Report</string>
+    <string name="latest_task_due">Latest Task Due</string>
+    <string name="stop_tasks">Stop Tasks</string>
 </resources>

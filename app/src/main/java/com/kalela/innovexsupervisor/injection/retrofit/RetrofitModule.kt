@@ -1,4 +1,4 @@
-package com.kalela.innovexsupervisor.injection
+package com.kalela.innovexsupervisor.injection.retrofit
 
 import com.kalela.innovexsupervisor.util.retrofit.RetrofitInstance
 import dagger.Module
@@ -14,6 +14,6 @@ class RetrofitModule {
     @Singleton
     @Provides
     fun provideRetrofitInstance(): Retrofit {
-        return RetrofitInstance.getRetrofitInstance();
+        return RetrofitInstance.getRetrofitInstance()
     }
 }
