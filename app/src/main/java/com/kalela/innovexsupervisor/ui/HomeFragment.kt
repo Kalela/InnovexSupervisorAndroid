@@ -49,12 +49,21 @@ class HomeFragment : Fragment() {
         binding.myViewModel = viewModel
         binding.lifecycleOwner = this
         viewModel.initializeClock()
+        viewModel.startRunningTasks()
         checkNetworkConnectivity()
+
+        stopTasks()
 
         handleColorChanges()
         toastHandler()
         prepareReportsFragment()
         return binding.root
+    }
+
+    private fun stopTasks() {
+        binding.stopTasksButton.setOnClickListener {
+            viewModel.stopAllTasks()
+        }
     }
 
     /**
@@ -78,7 +87,7 @@ class HomeFragment : Fragment() {
                 "STOP" -> {
                     binding.analogClock.backboardColor = it.color
                 }
-                "STOP" -> {
+                "REPORT" -> {
                     binding.analogClock.numbersColor = it.color
                 }
             }
@@ -100,7 +109,7 @@ class HomeFragment : Fragment() {
     /**
      * Check if phone is connected to the internet
      */
-    fun checkNetworkConnectivity() {
+    private fun checkNetworkConnectivity() {
         if (NetworkUtil.isOnline(requireActivity().applicationContext)) {
             viewModel.checkBackend() // Run first check if network available
             viewModel.isConnected = true

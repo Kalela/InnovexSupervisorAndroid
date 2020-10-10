@@ -83,6 +83,25 @@ class HomeFragmentViewModel(
         }
 
         response.observe(viewLifecycleOwner, Observer {
+            statusMessage.value = Event("Tasks stopped successfully")
+        })
+
+    }
+
+    /**
+     * Start running tasks
+     */
+    fun startRunningTasks() {
+        val tasksService: TasksService = retrofit.create(
+            TasksService::class.java
+        )
+
+        val response: LiveData<Response<HashMap<String, String>>> = liveData {
+            val response = tasksService.startTasks()
+            emit(response)
+        }
+
+        response.observe(viewLifecycleOwner, Observer {
             if (it.message() == "OK") {
                 statusMessage.value = Event("Tasks stopped successfully")
             }
