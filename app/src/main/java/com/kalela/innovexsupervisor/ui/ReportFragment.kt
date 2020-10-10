@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kalela.innovexsupervisor.R
 import com.kalela.innovexsupervisor.base.BaseApplication
@@ -24,19 +25,24 @@ import javax.inject.Inject
 
 class ReportFragment : Fragment() {
 
-    private lateinit var binding : FragmentReportBinding
+    private lateinit var binding: FragmentReportBinding
     private lateinit var viewModel: ReportFragmentViewModel
     private lateinit var viewModelFactory: ReportFragmentViewModelFactory
     private lateinit var adapter: TaskReportRecyclerViewAdapter
+
     @Inject
-    lateinit var retrofit : Retrofit
+    lateinit var retrofit: Retrofit
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_report, container, false)
         (activity?.application as BaseApplication).apiComponent.injectReportFragment(this)
+        viewModelFactory = ReportFragmentViewModelFactory(retrofit, viewLifecycleOwner)
+        viewModel =
+            ViewModelProvider(this, viewModelFactory).get(ReportFragmentViewModel::class.java)
 
         initRecyclerView()
 
@@ -44,13 +50,15 @@ class ReportFragment : Fragment() {
     }
 
     private fun initRecyclerView() {
-        binding.reportRecyclerView.layoutManager = LinearLayoutManager(requireActivity().applicationContext)
+        binding.reportRecyclerView.layoutManager =
+            LinearLayoutManager(requireActivity().applicationContext)
         adapter = TaskReportRecyclerViewAdapter()
         binding.reportRecyclerView.adapter = adapter
-        displaySubscribersList()
+        displayTaskList()
     }
 
-    private fun displaySubscribersList() {
+    private fun displayTaskList() {
+        viewModel.getAllTasks()
         viewModel.allTasks.observe(viewLifecycleOwner, Observer {
             adapter.setList(it)
             adapter.notifyDataSetChanged()

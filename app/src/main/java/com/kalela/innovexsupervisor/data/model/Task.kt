@@ -8,5 +8,6 @@ data class Task(
     var actualTimeAsString : String = "",
     val application_time: Timestamp = Timestamp(0,0),
     val task_definition: String = "",
-    val color : Int = 0
+    val color : Int = 0,
+    val isRunning : Boolean = false
 )

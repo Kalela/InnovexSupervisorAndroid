@@ -27,9 +27,9 @@ class HomeFragmentViewModel(
     val analogTime = MutableLiveData<AnalogTime>()
     var isConnected: Boolean = true
     private val statusMessage = MutableLiveData<Event<String>>()
-
     val message: LiveData<Event<String>>
         get() = statusMessage
+
     private var task = MutableLiveData<Task>()
     val dueTask: LiveData<Task>
         get() = task
@@ -50,13 +50,16 @@ class HomeFragmentViewModel(
                 responseDueTask.observe(viewLifecycleOwner, Observer {
                     when (it.body()?.get(0)?.name) {
                         "START" -> {
-                            task.value = Task(name = "STOP")
+                            task.value =
+                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "STOP", color = it1) }
                         }
                         "STOP" -> {
-                            task.value = Task(name = "REPORT")
+                            task.value =
+                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "REPORT", color = it1) }
                         }
                         "REPORT" -> {
-                            task.value = Task(name = "START")
+                            task.value =
+                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "START", color = it1) }
                         }
                     }
                 })

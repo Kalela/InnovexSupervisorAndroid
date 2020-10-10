@@ -38,8 +38,8 @@ class AnalogClock @JvmOverloads constructor(
     private var mHourHandSize = 0
     private var mHandSize = 0
     private val mFontSize = 50.0f
-    var numbersColor : Int = 0xFFFFFFF
-    var backboardColor : Int = 0xFF00000
+    var numbersColor : Int = Color.RED
+    var backboardColor : Int = Color.WHITE
 
     private fun init() {
         mHeight = height
@@ -74,7 +74,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawCircle(canvas: Canvas?) {
         mPaint?.reset()
-        setPaintAttributes(numbersColor, Paint.Style.FILL, 8.0f)
+        setPaintAttributes(backboardColor, Paint.Style.FILL, 8.0f)
         mPaint?.let {
             canvas?.drawCircle(
                 mCentreX.toFloat(), mCentreY.toFloat(), mRadius.toFloat(),
@@ -115,7 +115,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawMinuteHand(canvas: Canvas?, location: Float) {
         mPaint?.reset()
-        setPaintAttributes(Color.WHITE, Paint.Style.STROKE, 8.0f)
+        setPaintAttributes(Color.BLUE, Paint.Style.STROKE, 8.0f)
         mAngle = Math.PI * location / 30 - Math.PI / 2
         mPaint?.let {
             canvas?.drawLine(
@@ -131,7 +131,7 @@ class AnalogClock @JvmOverloads constructor(
 
     private fun drawHourHand(canvas: Canvas?, location: Double) {
         mPaint?.reset()
-        setPaintAttributes(Color.WHITE, Paint.Style.STROKE, 10.0f)
+        setPaintAttributes(Color.BLACK, Paint.Style.STROKE, 10.0f)
         mAngle = Math.PI * location / 30 - Math.PI / 2
         mPaint?.let {
             canvas?.drawLine(
