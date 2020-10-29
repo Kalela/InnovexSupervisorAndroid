@@ -9,5 +9,7 @@ data class Task(
     val application_time: Timestamp = Timestamp(0,0),
     val task_definition: String = "",
     val color : Int = 0,
-    val isRunning : Boolean = false
+    val isRunning : Boolean = false,
+    val error: String = "",
+    val message: String = ""
 )

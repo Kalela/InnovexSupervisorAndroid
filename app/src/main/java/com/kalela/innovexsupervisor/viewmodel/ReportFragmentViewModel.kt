@@ -22,6 +22,12 @@ class ReportFragmentViewModel(
     private var tasks = MutableLiveData<List<Task>>()
     val allTasks: LiveData<List<Task>>
         get() = tasks
+    private val statusMessage = MutableLiveData<Event<String>>()
+    val message: LiveData<Event<String>>
+        get() = statusMessage
+    private val snackStatusMessage = MutableLiveData<Event<String>>()
+    val snackMessage: LiveData<Event<String>>
+        get() = snackStatusMessage
 
     fun getAllTasks() {
         val tasksService: TasksService = retrofit.create(
@@ -33,7 +39,13 @@ class ReportFragmentViewModel(
         }
 
         response.observe(viewLifecycleOwner, Observer {
-            tasks.value = it.body()
+            if (it.body()?.get(0)?.error != "") {
+                snackStatusMessage.value = Event(
+                    "Could not get tasks from database. Please try again later."
+                )
+            } else {
+                tasks.value = it.body()
+            }
         })
     }
 

@@ -1,26 +1,27 @@
 package com.kalela.innovexsupervisor.ui
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.kalela.innovexsupervisor.R
 import com.kalela.innovexsupervisor.base.BaseApplication
 import com.kalela.innovexsupervisor.data.model.AnalogTime
 import com.kalela.innovexsupervisor.databinding.FragmentHomeBinding
 import com.kalela.innovexsupervisor.util.NetworkUtil
+import com.kalela.innovexsupervisor.util.showLoading
 import com.kalela.innovexsupervisor.viewmodel.HomeFragmentViewModel
 import com.kalela.innovexsupervisor.viewmodel.factory.HomeFragmentViewModelFactory
 import retrofit2.Retrofit
@@ -34,6 +35,7 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var viewModel: HomeFragmentViewModel
     private lateinit var viewModelFactory: HomeFragmentViewModelFactory
+    private lateinit var snackbar: Snackbar
 
     @Inject
     lateinit var retrofit: Retrofit
@@ -48,19 +50,55 @@ class HomeFragment : Fragment() {
         viewModel = ViewModelProvider(this, viewModelFactory).get(HomeFragmentViewModel::class.java)
         binding.myViewModel = viewModel
         binding.lifecycleOwner = this
-        viewModel.initializeClock()
-        viewModel.startRunningTasks()
+
         checkNetworkConnectivity()
-
-        stopTasks()
-
+        showLoading(true, binding.progressBar)
+        stopTasksClickListener()
+        observeTimerChanges();
         handleColorChanges()
         toastHandler()
+        snackHandler()
         prepareReportsFragment()
         return binding.root
     }
 
-    private fun stopTasks() {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+
+        if (!viewModel.clockInitialized) {
+            viewModel.startRunningTasks()
+            viewModel.initializeClock() // Ensure initialize clock and tasks is only done once
+        }
+        super.onActivityCreated(savedInstanceState)
+    }
+
+    override fun onDetach() {
+        viewModel.disposeClock()
+        super.onDetach()
+    }
+
+    /**
+     * Observe the timer values and populate the Analog clock view
+     */
+    private fun observeTimerChanges() {
+        viewModel.analogTime.observe(
+            viewLifecycleOwner,
+            Observer(function = fun(time: AnalogTime?) {
+                time.let {
+                    if (time != null) {
+                        binding.analogClock.mMinute = time.minutes
+                    }
+                    if (time != null) {
+                        binding.analogClock.mSecond = time.seconds
+                    }
+                }
+            })
+        )
+    }
+
+    /**
+     * Stop all running tasks
+     */
+    private fun stopTasksClickListener() {
         binding.stopTasksButton.setOnClickListener {
             viewModel.stopAllTasks()
         }
@@ -78,6 +116,7 @@ class HomeFragment : Fragment() {
 
         viewModel.dueTask.observe(viewLifecycleOwner, Observer {
             binding.taskName.text = it.name
+            showLoading(false, binding.progressBar)
             when (it.name) {
                 "START" -> { // Change color of the wall
                     layer.color = it.color
@@ -96,12 +135,35 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Handle toast message for this activity
+     * Handle toast message for this fragment in the activity
      */
     private fun toastHandler() {
         viewModel.message.observe(viewLifecycleOwner, Observer { event ->
             event.getContentIfNotHandled()?.let {
                 Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    /**
+     * Handle snackbar message for this fragment in the activity
+     */
+    private fun snackHandler() {
+        viewModel.snackMessage.observe(viewLifecycleOwner, Observer { event ->
+            event.getContentIfNotHandled()?.let {
+                snackbar = Snackbar.make(binding.root, it,
+                    Snackbar.LENGTH_INDEFINITE).setAction("Exit", View.OnClickListener {
+                    activity?.finish();
+                })
+                snackbar.setActionTextColor(Color.BLUE)
+                val snackbarView = snackbar.view
+                snackbarView.setBackgroundColor(Color.LTGRAY)
+                val textView =
+                    snackbarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+                textView.setTextColor(Color.BLACK)
+                textView.textSize = 14f
+                showLoading(false, binding.progressBar) // Only works because snackbar message only handles one error occurrnce
+                snackbar.show()
             }
         })
     }
@@ -118,33 +180,13 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.analogTime.observe(
-            viewLifecycleOwner,
-            Observer(function = fun(time: AnalogTime?) {
-                time.let {
-                    if (time != null) {
-                        binding.analogClock.mMinute = time.minutes
-                    }
-                    if (time != null) {
-                        binding.analogClock.mSecond = time.seconds
-                    }
-                }
-            })
-        )
-    }
-
     /**
      * Set up on click listener that opens reports fragment
      */
     private fun prepareReportsFragment() {
         binding.getReportButton.setOnClickListener {
             it.findNavController().navigate(R.id.action_homeFragment_to_reportFragment)
-
         }
     }
-
-
 
 }

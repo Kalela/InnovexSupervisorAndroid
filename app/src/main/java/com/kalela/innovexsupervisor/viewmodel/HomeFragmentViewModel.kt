@@ -1,5 +1,6 @@
 package com.kalela.innovexsupervisor.viewmodel
 
+import android.util.Log
 import androidx.databinding.Observable
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
@@ -7,6 +8,7 @@ import com.kalela.innovexsupervisor.data.model.AnalogTime
 import com.kalela.innovexsupervisor.data.model.Task
 import com.kalela.innovexsupervisor.injection.retrofit.TasksService
 import com.kalela.innovexsupervisor.util.Event
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,10 +31,17 @@ class HomeFragmentViewModel(
     private val statusMessage = MutableLiveData<Event<String>>()
     val message: LiveData<Event<String>>
         get() = statusMessage
+    private val snackStatusMessage = MutableLiveData<Event<String>>()
+    val snackMessage: LiveData<Event<String>>
+        get() = snackStatusMessage
 
     private var task = MutableLiveData<Task>()
     val dueTask: LiveData<Task>
         get() = task
+
+    private var tasksStopped: Boolean = false
+    var clockInitialized: Boolean = false
+    val timer: Timer = Timer()
 
 
     private fun checkBackendTasks() {
@@ -48,25 +57,45 @@ class HomeFragmentViewModel(
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.Main) {
                 responseDueTask.observe(viewLifecycleOwner, Observer {
-                    when (it.body()?.get(0)?.name) {
-                        "START" -> {
-                            task.value =
-                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "STOP", color = it1) }
-                        }
-                        "STOP" -> {
-                            task.value =
-                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "REPORT", color = it1) }
-                        }
-                        "REPORT" -> {
-                            task.value =
-                                it.body()?.get(0)?.color?.let { it1 -> Task(name = "START", color = it1) }
+                    if (it.body()?.get(0)?.error != "") {
+                        snackStatusMessage.value = Event(
+                            "An error occurred on our end. Please try again later."
+                        )
+                        stopAllTasks()
+                    } else {
+                        when (it.body()?.get(0)?.name) {
+                            "START" -> {
+                                task.value =
+                                    it.body()?.get(0)?.color?.let { it1 ->
+                                        Task(
+                                            name = "STOP",
+                                            color = it1
+                                        )
+                                    }
+                            }
+                            "STOP" -> {
+                                task.value =
+                                    it.body()?.get(0)?.color?.let { it1 ->
+                                        Task(
+                                            name = "REPORT",
+                                            color = it1
+                                        )
+                                    }
+                            }
+                            "REPORT" -> {
+                                task.value =
+                                    it.body()?.get(0)?.color?.let { it1 ->
+                                        Task(
+                                            name = "START",
+                                            color = it1
+                                        )
+                                    }
+                            }
                         }
                     }
                 })
             }
         }
-
-
     }
 
     /**
@@ -81,7 +110,7 @@ class HomeFragmentViewModel(
             val response = tasksService.stopTasks()
             emit(response)
         }
-
+        tasksStopped = true;
         response.observe(viewLifecycleOwner, Observer {
             statusMessage.value = Event("Tasks stopped successfully")
         })
@@ -133,7 +162,9 @@ class HomeFragmentViewModel(
      * Set up recurring calls to simulate time.
      */
     fun initializeClock() {
-        Timer().scheduleAtFixedRate(timerTask {
+        clockInitialized = true
+        timer.scheduleAtFixedRate(timerTask {
+            Log.d(TAG, "initializeClock: seconds is $seconds, minutes is $minutes")
             seconds += 1
             if (seconds % 60 == 0) {
                 minutes += 1
@@ -143,26 +174,28 @@ class HomeFragmentViewModel(
                 mHourTracked =
                     if (mHourTracked > 12) mHourTracked - 12 else mHourTracked // Convert to 12 hour
             }
-            viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.Main) {
-                    analogTime.value = getTime(seconds, minutes)
-                }
-            }
+
+
+            analogTime.postValue(AnalogTime(seconds, minutes))
+
 
             checkBackend()
         }, 1000, 1000)
 
     }
 
-    private fun getTime(seconds: Int, minutes: Int): AnalogTime {
-        return AnalogTime(seconds, minutes)
+    /**
+     * Dispose timer
+     */
+    fun disposeClock() {
+        timer.cancel()
     }
 
     /**
      * Check running tasks if 30 seconds have elapsed
      */
     fun checkBackend() {
-        if (seconds % 10 == 0) {
+        if (seconds % 10 == 0 && !tasksStopped && seconds > 0) {
             checkBackendTasks()
         }
     }
